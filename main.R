@@ -1,24 +1,25 @@
-library(readr)
-library(igraph)
-library(sqldf)
-
 # work plan
 # 1. Load the gene-disease network and Archs4 gene-gene similarity network
 # 2. For each gene in Step 1 get the genes with at least 0.5 similarity
 # 3. Create a network (edgelist) with two types of edges: 1) gene-disease, and 2) gene-gene-similarity
 # 4. Create positive and negative examples.
-#    POS: 50% of gene-disease edges ---> delete them from the network in Step 3.
-#    NEG: the same number of POS examples - randomly select pairs of node-disease that have no edges in Step 3.
-# 5. Delete POS examples from the original network in Step 3.
-# 6. Train Node2Vec on the new network in Step 5
-# 7. Two predistion approches:
-#     7.1 Node classification
+#    4.1 POS: sample 20% of gene-disease edges and delete them from the original network (Step 3)
+#    4.2 NEG: sample the same number of POS examples - randomly select pairs of node-disease that have no edges in Step 3.
+# 5. Train Node2Vec on the new network in Step 5
+# 6. Two predistion approches:
+#     6.1 Node classification
 #         Label nodes with disease affiliation
 #         Get node embeddings from the Node2Vec model in 6
 #         For each disease cluster- classify node embeddings as belong/not to the disease
-#     7.2 Edge prediction
+#     6.2 Edge prediction
 #         Get node embeddings from the Node2Vec model in 6
 #         For each disease node- classify sum(embeddings gene, embeddings disease) as form/not
+
+
+library(readr)
+library(igraph)
+library(sqldf)
+library(dplyr)
 
 # ------------------------  Step 1 -------------------------------------------------------------
 # load the human gene-gene correlation matrix from Archs4
@@ -57,16 +58,44 @@ write.csv(edges,file="~/zalon/gene_disease/data/combined_edges.csv")
 
 # ------------------------  Step 4 -------------------------------------------------------------
 # Create positive and negative examples.
-#    POS: Randomly sample 50% of edges from each gene-disease pair
-library(dplyr)
+
+#    4.1 POS: Randomly sample 20% of edges from each gene-disease pair BUT keep the graph connected!
+
+g<-graph_from_data_frame(edges[,c("from","to")])
+clu<-components(g)
+POS<-data.frame()
 df <- edges[edges$type==1,]
-POS <- df %>% group_by(from) %>% sample_frac(0.2)
-POS$type<-NULL
+disease<-unique(df$from)
+for(i in 1:length(disease)){
+  print(i)
+  e<-get.data.frame(g)
+  e<-e[e$from==disease[i],]
+  k = as.integer(0.2*nrow(e)) # sample 20% of edges from each disease
+  for(j in 1:k){
+    eg<-e[sample(nrow(e),1),]
+    g_tmp<-delete_edges(g, paste0(eg$from[1],"|",eg$to[1]))
+    while(components(g_tmp)$no != clu$no){
+      eg<-e[sample(nrow(e),1),]
+      g_tmp<-delete_edges(g, paste0(eg$from[1],"|",eg$to[1]))
+    }
+    g<-delete_edges(g, paste0(eg$from[1],"|",eg$to[1]))
+    e<-get.data.frame(g)
+    e<-e[e$from==disease[i],]
+    POS<-rbind(POS,eg)
+  }
+}
 
-#    NEG: the same number of POS examples -
-#       4.1) Randomly select N/2 pairs of gene-gene that have no edges in Step 3
-#       4.2) Randomly select N/2 pairs of gene-disease that have no edges in Step 3
+# save the graph for training (187 diseases and 414 genes)
+edgelist_node2vec <- get.data.frame(g)
+write.csv(edgelist_node2vec,file="~/zalon/gene_disease/data/edgelist_node2vec.csv")
+write.csv(edges,file="~/zalon/gene_disease/data/original_edges.csv")
 
+
+#    4.2 NEG: the same number of POS examples
+#       4.2.1) Randomly select N/2 pairs of gene-gene that have no edges in Step 3
+#       4.2.2) Randomly select N/2 pairs of gene-disease that have no edges in Step 3
+
+#       sub-step 4.2.1 ------------------------------------------------------- 
 N = nrow(POS)
 only_genes <- union(edges[edges$type==2,]$from, edges[edges$type==2,]$to)
 only_genes <- union(only_genes, edges[edges$type==1,]$to)
@@ -88,7 +117,7 @@ for(i in 1:round(N/2)){
   NEG<-rbind(NEG,data.frame(from=fr,to=to))
 }
 
-# step 4.2
+#     step 4.2  ------------------------------------------------------------------------------------
 df = edges[edges$type==1,] # take only gene-disease edges
 NEG_df <- data.frame()
 N = nrow(POS)-nrow(NEG)
@@ -113,26 +142,13 @@ for(i in 1:N){
 NEG<-rbind(NEG,NEG_df)
 
 # save positive and negative examples
-write.csv(POS,file="~/zalon/gene_disease/data/POS_edges.csv")
-write.csv(NEG,file="~/zalon/gene_disease/data/NEG_edges.csv")
+POS$type<-1
+NEG$type<-0
 
-# ------------------------  Step 5 -------------------------------------------------------------
-# delete positive examples (POS edges) from the original network 
-edges<-data.frame(edges)
-POS<-data.frame(POS)
-POS$type<-3 # positive gene-disease edge
-train_edges <- rbind(edges,POS)
-train_edges$type<-NULL
-train_edges <- train_edges[!duplicated(train_edges,fromLast = FALSE)&!duplicated(train_edges,fromLast = TRUE),] 
-write.csv(train_edges,file="~/zalon/gene_disease/data/train_edges.csv")
+Training_testing<- rbind(POS,NEG)
+# suffle rows
+Training_testing<-Training_testing[sample(nrow(Training_testing)),]
+Training_testing[Training_testing$from %in% ,]$is_disease
 
-# number of diseases: 187
-length(unique(train_edges[train_edges$type!=2 ,]$from))
 
-# number of unique genes 2365
-genes<-union(train_edges[train_edges$type!=2 ,]$to , c(train_edges[train_edges$type==1 ,]$to,train_edges[train_edges$type==1 ,]$from))
-genes<-union(genes, c(train_edges[train_edges$type==3 ,]$to,train_edges[train_edges$type==3 ,]$from ))
-length(unique(genes))
-
-g<-graph_from_data_frame(train_edges,directed=FALSE)
-components(g)
+write.csv(Training_testing,file="~/zalon/gene_disease/data/training_testing_edges.csv")
