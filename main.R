@@ -1,19 +1,37 @@
-# work plan
+# # work plan
+# [R]
 # 1. Load the gene-disease network and Archs4 gene-gene similarity network
-# 2. For each gene in Step 1 get the genes with at least 0.5 similarity
-# 3. Create a network (edgelist) with two types of edges: 1) gene-disease, and 2) gene-gene-similarity
-# 4. Create positive and negative examples.
-#    4.1 POS: sample 20% of gene-disease edges and delete them from the original network (Step 3)
-#    4.2 NEG: sample the same number of POS examples - randomly select pairs of node-disease that have no edges in Step 3.
-# 5. Train Node2Vec on the new network in Step 5 [python]
-# 6. Two predistion approches:
-#     6.1 Node classification
-#         Label nodes with disease affiliation
-#         Get node embeddings from the Node2Vec model in 5
-#         For each disease cluster- classify node embeddings as belong/not to the disease
-#     6.2 Edge prediction
-#         Get node embeddings from the Node2Vec model in 5
-#         For each disease node - classify sum(embeddings gene, embeddings disease) as link (i.e. type=1) or not (i.e. type=0)
+# 2. For each gene in Step 1 get genes with at least 0.5 similarity
+# 3. Original network - create a network (edgelist) with two types of edges:
+#   * gene-disease
+# * gene-gene similarity
+# 4. Create positive (`POS`) and negative (`NEG`) examples.
+# 
+# 4.1 `POS`: sample 20% of gene-disease edges and delete them from the original network (Step 3) while ensuring that the original network obtained
+# after edge removals is connected
+# 
+# 4.2 `NEG`: sample the same number as `POS` examples - randomly select pairs of nodes that have no edges in Step 3.
+# * 50% of gene-gene edges
+# * 50% of gene-disease edges
+# 4.3 Suffle and split the examples into training (80%) and testing (20%)
+# 
+# [python]
+# 
+# 5. Train Node2Vec on the new network after removing edges in Step 4.1
+# 6. Two prediction approches:
+#   
+#   6.1 Edge prediction
+# * Get node embeddings of the Node2Vec model in Step 5
+# * For each disease in the training set - classify sum(embeddings gene, embeddings disease) as link (i.e. type=1) or not (i.e. type=0)
+# * Evaluate the model on the testing set
+# 
+# 6.2 Node classification
+# * Label nodes with disease affiliation
+# * Get node embeddings from the Node2Vec model in 5
+# * For each disease cluster- classify node embeddings as belong/not to the disease
+# 
+
+
 
 
 library(readr)
@@ -148,7 +166,24 @@ NEG$type<-0
 Training_testing<- rbind(POS,NEG)
 # suffle rows
 Training_testing<-Training_testing[sample(nrow(Training_testing)),]
-Training_testing[Training_testing$from %in% ,]$is_disease
-
 
 write.csv(Training_testing,file="~/zalon/gene_disease/data/training_testing_edges.csv")
+
+# number of gene-gene edges
+x<-edgelist_node2vec[!(edgelist_node2vec$from %in% gene_disease$disease),]
+
+# number of gene-disease edges
+x<-edgelist_node2vec[(edgelist_node2vec$from %in% gene_disease$disease),]
+
+# number of unique genes
+length( union( edgelist_node2vec[!(edgelist_node2vec$from %in% gene_disease$disease),1] , 
+               edgelist_node2vec[!(edgelist_node2vec$from %in% gene_disease$disease),1] ) )
+
+# number of unique disease
+length( unique(edgelist_node2vec[edgelist_node2vec$from %in% gene_disease$disease,1]))
+
+
+
+
+
+
