@@ -5,15 +5,15 @@
 # 4. Create positive and negative examples.
 #    4.1 POS: sample 20% of gene-disease edges and delete them from the original network (Step 3)
 #    4.2 NEG: sample the same number of POS examples - randomly select pairs of node-disease that have no edges in Step 3.
-# 5. Train Node2Vec on the new network in Step 5
+# 5. Train Node2Vec on the new network in Step 5 [python]
 # 6. Two predistion approches:
 #     6.1 Node classification
 #         Label nodes with disease affiliation
-#         Get node embeddings from the Node2Vec model in 6
+#         Get node embeddings from the Node2Vec model in 5
 #         For each disease cluster- classify node embeddings as belong/not to the disease
 #     6.2 Edge prediction
-#         Get node embeddings from the Node2Vec model in 6
-#         For each disease node- classify sum(embeddings gene, embeddings disease) as form/not
+#         Get node embeddings from the Node2Vec model in 5
+#         For each disease node - classify sum(embeddings gene, embeddings disease) as link (i.e. type=1) or not (i.e. type=0)
 
 
 library(readr)
