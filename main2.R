@@ -28,8 +28,8 @@ write.csv(g_d_edges,file = "/users/alon/desktop/gd/g_d_edges.csv")
 # load gene-tissue data from https://www.proteinatlas.org/about/download
 
 normal_tissue_tsv <- read_delim("gd/normal_tissue.tsv.zip", "\t", escape_double = FALSE, trim_ws = TRUE)
-tis<-normal_tissue_tsv[normal_tissue_tsv$Reliability!='Uncertain',]
-tis<-tis[tis$Level %in% c( 'High','Low','Medium'),]
+tis<-normal_tissue_tsv[normal_tissue_tsv$Reliability %in% c('Approved','Enhanced'),]
+tis<-tis[tis$Level %in% c( 'High','Medium'),]
 g<-graph_from_data_frame(tis[,c('Gene name', 'Tissue')])
 g2M <-g
 V(g2M)$type <- bipartite_mapping(g2M)$type 
@@ -38,29 +38,35 @@ colnames(g_el) <- c("gene", "tissue")
 V(g)$type <- ifelse(V(g)$name %in% g_el[,"gene"], TRUE, FALSE)
 projected_g <- bipartite_projection(g, multiplicity = TRUE)
 gene_gene_net <- projected_g$proj2 # nodes:10722, edges:52686716
-gene_gene_net_edges <- as_data_frame(gene_gene_net)
+gene_gene_net_edges <- cbind( get.edgelist(gene_gene_net) , E(gene_gene_net)$weight )
+gene_gene_net_edges<-data.table(gene_gene_net_edges)
 write.csv(gene_gene_net_edges,file="/users/alon/desktop/gene_gene_net_edges_normal_tissue.csv")
+#fwrite(gene_gene_net_edges, "/users/alon/desktop/gene_gene_net_edges_normal_tissue.csv")
 
 # =========================================================================================================================
 # STEP3: enrich the gene-disease network with gene-gene edges from Step 2
 # =========================================================================================================================
+
+g_d_edges<-fread("unzip -p /users/alon/desktop/gd/g_d_edges.csv.zip",header=TRUE)
+g_d_edges$V1<-NULL
 g_d_edges$type<-1
 
-gene_gene <- read_csv("gd/gene_gene_net_edges_normal_tissue.csv.zip")
-gene_gene<-data.table(gene_gene)
-# keep only edges with weight above 100
-g_g_t<-gene_gene[gene_gene$weight>100,] 
+gene_gene <- fread("unzip -p gd/gene_gene_net_edges_normal_tissue.csv.zip",header=TRUE)
+gene_gene$V1<-NULL
+names(gene_gene)<-c("from","to","weight")
+# keep only gene-gene tissue edges with weight above 100
+g_g_t<-gene_gene[gene_gene$weight>100,]
 g_g_t$type<-2
 g_g_t$weight<-NULL
 
 # from g_g_t (tissue info) edges, keep only edges that their nodes (genes) are in gene-disease (g_d_edges)
-keep_gg_edges<-g_g_t[g_g_t$from %in% unique(g_d_edges$geneSymbol) |
-                       g_g_t$to %in% unique(g_d_edges$geneSymbol),]
+genes<-unique(g_d_edges$geneSymbol)
+keep_gg_edges<-g_g_t[g_g_t$from %in% genes | g_g_t$to %in% genes,]
 
 # add edges to creare gene-disease network with gene-gene edges from gene-tissue network
 g_d_edges<-data.table(g_d_edges)
 names(g_d_edges)<-names(keep_gg_edges)
-g_d_t<-rbind(g_d_edges,keep_gg_edges) # 628668+9335909 = 9964577
+g_d_t<-rbind(g_d_edges,keep_gg_edges) # gene=disease:628668; gene-gene: 615903 edges
 
 write.csv2(g_d_t,"/users/alon/desktop/gd/g_d_t.csv")
 
@@ -168,3 +174,13 @@ pos_neg_edges<-rbind(neg_edges,pos_edges)
 rows <- sample(nrow(pos_neg_edges))
 df <- pos_neg_edges[rows, ]
 write.csv(df,file="/users/alon/desktop/gd/pos_neg_edges.csv")
+
+
+
+
+
+
+
+
+
+
