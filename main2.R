@@ -91,28 +91,6 @@ g<-graph_from_data_frame(gene_disease,directed = FALSE)
 diseases<-unique(gene_disease$disease) # 24,166 diseases
 clu <- components(g)
 
-
-# for(disease in diseases){
-#   print(disease)
-#   df<-gene_disease[gene_disease$disease==disease,]
-#   N = round(0.2*nrow(df))
-#   smpedges<-data.frame()
-#   # sample gene-edges
-#   i=1
-#   while(nrow(smpedges)<N){
-#     print(i)
-#     edge<-df[sample(1:nrow(df),1),] # sample 1 edge
-#     new_edges <- gene_disease[gene_disease$gene!=edge$gene & gene_disease$disease!=edge$disease,] # all edges without the sampled edge
-#     g_tmp<-graph_from_data_frame(new_edges)
-#     if(components(g)$no <= clu$no){
-#       smpedges <- rbind(smpedges,edge)
-#       gene_disease <- new_edges
-#       i=i+1
-#     }
-#   }
-# }
-
-
 # this is a try to sample 20% positive gene-disease edges while ignoring number of components
 pos_edges<-foreach(i = 1:length(diseases),.combine = rbind)%do%{
   print(i)
@@ -122,21 +100,20 @@ pos_edges<-foreach(i = 1:length(diseases),.combine = rbind)%do%{
   return(edges)
 }
 
-
-# pos_edges has 12,648 diseases (out of ~24k since some disease have only 1-2 gene)
-# round(0.2*N=2) or round(0.2*N=1) is 0! so only diseases with more than 2 genes are sampled for pos examples
-write.csv(pos_edges,file="/users/alon/desktop/gd/pos_edges.csv")
-
+names(pos_edges)<-c("from","to")
 
 # delete pos edges from the graph to create train edges for the N2V embeddings
-g<-graph_from_data_frame(g_d_t,directed = FALSE)
-names(pos_edges)<-c("from","to")
-relations<-anti_join(g_d_t, pos_edges, by=c("from","to"))
-actors <- V(g)$name
-g2<- graph_from_data_frame(relations, directed=FALSE, vertices=actors)
-new_network<-as_edgelist(g2)
-write.csv(new_network,file="/users/alon/desktop/gd/new_network.csv")
+new_network<-anti_join(g_d_t, pos_edges, by=c("from","to"))
 
+# remove only edges that their removal their nodes are still in the new network
+pos_edges<-pos_edges[pos_edges$from %in% union(new_network$from,new_network$to) & 
+                       pos_edges$to %in% union(new_network$from,new_network$to),]
+
+new_network<-anti_join(g_d_t, pos_edges, by=c("from","to"))
+table( union(pos_edges$from, pos_edges$to) %in% union(new_network$from,new_network$to))
+
+write.csv(pos_edges,file="/users/alon/desktop/gd/pos_edges.csv")
+write.csv(new_network,file="/users/alon/desktop/gd/new_network.csv")
 
 
 # `NEG`: sample the same number as `POS` examples - randomly select pairs of nodes that have no edges in Step 3.
@@ -185,6 +162,7 @@ neg_gene_gene_edges <- rbind(neg_gene_gene_edges,tmp)
 neg_edges<-rbind(neg_edges,neg_gene_gene_edges)
 neg_edges <- anti_join(neg_edges,g_d_t, by=c("from","to"))
 
+table( union(neg_edges$from, neg_edges$to) %in% union(new_network$from,new_network$to))
 write.csv(neg_edges,file="/users/alon/desktop/gd/neg_edges.csv")
 
 
@@ -194,10 +172,7 @@ rows <- sample(nrow(pos_neg_edges))
 df <- pos_neg_edges[rows, ]
 
 # test that all genes are in the gene_disease_tissue network
-new_network<-fread("/users/alon/desktop/gd/new_network.csv",header = TRUE)
-new_network$V1<-NULL
-names(new_network)<-c("from","to")
-a<-df[df$from %in% union(new_network$from,new_network$to) | df$to %in% union(new_network$from,new_network$to),]
+table( union(df$from, df$to) %in% union(new_network$from,new_network$to))
 
 write.csv(a,file="/users/alon/desktop/gd/pos_neg_edges.csv")
 
