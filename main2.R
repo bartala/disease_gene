@@ -12,11 +12,13 @@ library(foreach)
 
 g_d_edges<-read_delim("/users/alon/desktop/gd/all_gene_disease_associations.tsv.gz", "\t", escape_double = FALSE, trim_ws = TRUE)
 # keep edges from 2018 out of the picture
-g_d_edges<-g_d_edges[g_d_edges$YearFinal<2018,]
+# g_d_edges<-g_d_edges[g_d_edges$YearFinal<2018,]
 
-g_d_edges<-g_d_edges[,c("geneSymbol","diseaseId")]
 # remove duplicates
-g_d_edges<-sqldf("select geneSymbol,diseaseId, count(1) as weight from g_d_edges group by geneSymbol,diseaseId")
+x<-sqldf("select geneSymbol,diseaseId, count(1), min(YearInitial) as weight from g_d_edges group by geneSymbol,diseaseId")
+
+g_d_edges<-x[,c("geneSymbol","diseaseId")]
+
 g_d_edges<-g_d_edges[,c("geneSymbol","diseaseId")] # Edges: 628,668 ; Genes 17,545 ; Diseases: 24,166
 keep<-sqldf("select diseaseId,count(1) from g_d_edges group by diseaseId")
 keep<-keep[keep$`count(1)`>10,]
