@@ -3,3 +3,4 @@
 *.txt
 *.rda
 .DS_Store
+data/normal_tissue.tsv.zip
