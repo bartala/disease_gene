@@ -11,13 +11,23 @@ library(foreach)
 # load disease data from https://www.disgenet.org/downloads
 
 g_d_edges<-read_delim("/users/alon/desktop/gd/all_gene_disease_associations.tsv.gz", "\t", escape_double = FALSE, trim_ws = TRUE)
-# keep edges from 2018 out of the picture
-# g_d_edges<-g_d_edges[g_d_edges$YearFinal<2018,]
 
 # remove duplicates
+g_d_edges[is.na(g_d_edges$YearInitial),'YearInitial']<-0
+g_d_edges$YearInitial<-as.numeric(g_d_edges$YearInitial)
+
+# keep edges from 2018 out of the picture
+# e_d_2016<-g_d_edges[g_d_edges$YearFinal<=2016,]
+# e_d_2017<-g_d_edges[g_d_edges$YearFinal==2017,]
+# e_d_2018<-g_d_edges[g_d_edges$YearFinal==2018,]
+
+# g_d_edges <- e_d_2016
+# g_d_edges <- e_d_2017
+# g_d_edges <- e_d_2018
+
 x<-sqldf("select geneSymbol,diseaseId, count(1), min(YearInitial) as weight from g_d_edges group by geneSymbol,diseaseId")
 
-g_d_edges<-x[,c("geneSymbol","diseaseId")]
+g_d_edges<-x[,c("geneSymbol","diseaseId","weight")]
 
 g_d_edges<-g_d_edges[,c("geneSymbol","diseaseId")] # Edges: 628,668 ; Genes 17,545 ; Diseases: 24,166
 keep<-sqldf("select diseaseId,count(1) from g_d_edges group by diseaseId")
@@ -27,6 +37,10 @@ g_d_edges<-g_d_edges[g_d_edges$diseaseId %in% keep$diseaseId,]
 
 
 write.csv(g_d_edges,file = "/users/alon/desktop/gd/g_d_edges.csv")
+#write.csv(g_d_edges,file = "/users/alon/desktop/e_d_2016.csv")
+#write.csv(g_d_edges,file = "/users/alon/desktop/e_d_2017.csv")
+#write.csv(g_d_edges,file = "/users/alon/desktop/e_d_2018.csv")
+
 
 # =========================================================================================================================
 # STEP2: gene-tissue --> gene-gene network
@@ -55,6 +69,7 @@ write.csv(gene_gene_net_edges,file="/users/alon/desktop/gene_gene_net_edges_norm
 # =========================================================================================================================
 
 g_d_edges<-fread("/users/alon/desktop/gd/g_d_edges.csv",header=TRUE)
+# g_d_edges<-fread("/users/alon/desktop/e_d_2016.csv",header=TRUE)
 g_d_edges$V1<-NULL
 g_d_edges$type<-1
 
@@ -76,7 +91,8 @@ g_d_edges<-data.table(g_d_edges)
 names(g_d_edges)<-names(keep_gg_edges)
 g_d_t<-rbind(g_d_edges,keep_gg_edges) # gene=disease:628668; gene-gene: 615903 edges
 
-write.csv2(g_d_t,"/users/alon/desktop/gd/g_d_t.csv")
+write.csv(g_d_t,"/users/alon/desktop/gd/g_d_t.csv")
+# write.csv(g_d_t,"/users/alon/desktop/g_d_t_m3.csv")
 
 # =========================================================================================================================
 # STEP4: Create positive (`POS`) and negative (`NEG`) examples.
@@ -228,4 +244,11 @@ table(genes %in% gene_names$x)
 FALSE  TRUE 
 3563 17188 
 
+
+
+
+
+
+
+x<-union(x, g_d_t_m3[g_d_t_m3$type==2,]$from)
 
