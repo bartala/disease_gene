@@ -14,6 +14,9 @@ PTH = "/path/to/data/" # enter your data path
 
 g_d_edges<-read_delim(paste0(PTH,"all_gene_disease_associations.tsv.gz"), "\t", escape_double = FALSE, trim_ws = TRUE)
 
+g_d_edges<-g_d_edges[g_d_edges$DiseaseType == 'disease',]
+g_d_edges<-g_d_edges[g_d_edges$DiseaseSemanticType == 'Disease or Syndrome',]
+
 # update missing year values
 g_d_edges[is.na(g_d_edges$YearInitial),'YearInitial']<-0
 g_d_edges$YearInitial<-as.numeric(g_d_edges$YearInitial)
