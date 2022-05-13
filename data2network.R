@@ -22,14 +22,14 @@ g_d_edges[is.na(g_d_edges$YearInitial),'YearInitial']<-0
 g_d_edges$YearInitial<-as.numeric(g_d_edges$YearInitial)
 
 # create an edge-list
-x<-sqldf("select geneSymbol,diseaseId, count(1), min(YearInitial) as weight from g_d_edges group by geneSymbol,diseaseId")
+x<-sqldf("select geneSymbol,diseaseId, count(1) as weight, min(YearInitial) from g_d_edges group by geneSymbol,diseaseId")
 
 g_d_edges<-x[,c("geneSymbol","diseaseId","weight")]
 g_d_edges<-g_d_edges[,c("geneSymbol","diseaseId")]
 
-# keep gene-diesease affiliation having a frequency of at least 100
-keep<-sqldf("select diseaseId,count(1) from g_d_edges group by diseaseId")
-keep<-keep[keep$`count(1)`>100,]
+# keep remove diseases with less than 2 genes
+keep<-sqldf("select diseaseId, count(1) from g_d_edges group by diseaseId")
+keep<-keep[keep$`count(1)`>2,]
 g_d_edges<-g_d_edges[g_d_edges$diseaseId %in% keep$diseaseId,]
 
 write.csv(g_d_edges,file = paste0(PTH,"g_d_edges.csv"))
