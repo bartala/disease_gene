@@ -103,36 +103,26 @@ g<-graph_from_data_frame(gene_disease,directed = FALSE)
 diseases<-unique(gene_disease$disease)
 clu <- components(g)
 
-
-# for(disease in diseases){
-#   print(disease)
-#   df<-gene_disease[gene_disease$disease==disease,]
-#   N = round(0.2*nrow(df))
-#   smpedges<-data.frame()
-#   # sample gene-edges
-#   i=1
-#   while(nrow(smpedges)<N){
-#     print(i)
-#     edge<-df[sample(1:nrow(df),1),] # sample 1 edge
-#     new_edges <- gene_disease[gene_disease$gene!=edge$gene & gene_disease$disease!=edge$disease,] # all edges without the sampled edge
-#     g_tmp<-graph_from_data_frame(new_edges)
-#     if(components(g)$no <= clu$no){
-#       smpedges <- rbind(smpedges,edge)
-#       gene_disease <- new_edges
-#       i=i+1
-#     }
-#   }
-# }
-
-
-# this is a try to sample 50% positive gene-disease edges while ignoring number of components
-pos_edges<-foreach(i = 1:length(diseases),.combine = rbind)%do%{
-  print(i)
-  df<-gene_disease[gene_disease$disease==diseases[i],]
-  N = round(0.5*nrow(df))
-  edges<-df[sample(1:nrow(df),N),] # sample N edges
-  return(edges)
-}
+# sample positive edges
+for(disease in diseases){
+   print(disease)
+   df<-gene_disease[gene_disease$disease==disease,]
+   N = round(0.2*nrow(df))
+   smpedges<-data.frame()
+   # sample gene-edges
+   i=1
+   while(nrow(smpedges)<N){
+     print(i)
+     edge<-df[sample(1:nrow(df),1),] # sample 1 edge
+     new_edges <- gene_disease[gene_disease$gene!=edge$gene & gene_disease$disease!=edge$disease,] # all edges without the sampled edge
+     g_tmp<-graph_from_data_frame(new_edges)
+     if(components(g)$no <= clu$no){
+       smpedges <- rbind(smpedges,edge)
+       gene_disease <- new_edges
+       i=i+1
+     }
+   }
+ }
 
 
 # delete pos edges from the graph to create train edges for the N2V embeddings
