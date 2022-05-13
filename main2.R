@@ -38,8 +38,8 @@ write.csv(g_d_edges,file = paste0(PTH,"g_d_edges.csv"))
 # load gene-tissue data from https://www.proteinatlas.org/about/download
 
 normal_tissue_tsv <- read_delim(paste0(PTH,"normal_tissue.tsv.zip"), "\t", escape_double = FALSE, trim_ws = TRUE)
-tis<-normal_tissue_tsv[normal_tissue_tsv$Reliability %in% c('Approved','Enhanced'),]
-tis<-tis[tis$Level %in% c( 'High','Medium'),]
+tis<-normal_tissue_tsv[normal_tissue_tsv$Reliability %in% c('Approved'),]
+tis<-tis[tis$Level %in% c( 'High'),]
 g<-graph_from_data_frame(tis[,c('Gene name', 'Tissue')])
 g2M <-g
 V(g2M)$type <- bipartite_mapping(g2M)$type 
@@ -91,7 +91,7 @@ write.csv(g_d_t,paste0(PTH,"g_d_t.csv"))
 # STEP4: Create positive (`POS`) and negative (`NEG`) examples.
 # =========================================================================================================================
 
-# 4.1 `POS` Examples: sample 50% of *gene-disease* edges (type 1) and delete them from the original network (g_d_t.csv) 
+# 4.1 `POS` Examples: sample 20% of *gene-disease* edges (type 1) and delete them from the original network (g_d_t.csv) 
 # while ensuring that the original network obtained after edge removals is connected
 g_d_t <- fread(paste0(PTH,'g_d_t.csv'))
 g_d_t$V1<-NULL
@@ -180,7 +180,7 @@ neg_edges<-neg_edges[union(neg_edges$from,neg_edges$to) %in% union(dis$from,dis$
 write.csv(neg_edges,file=paste0(PTH,"neg_edges.csv"))
 
 
-#4.3 Shuffle and split the examples (`training_testing_edges.csv`) into training (80%) and testing (20%)
+#4.3 Shuffle and split the examples (`training_testing_edges.csv`) into training (70%) and testing (30%)
 neg_edges<-neg_edges <- read_csv(paste0(PTH,"neg_edges.csv"), col_types = cols(X1 = col_skip()))
 pos_edges<-pos_edges <- read_csv(paste0(PTH,"pos_edges.csv"), col_types = cols(X1 = col_skip()))
 neg_edges$type<-0
