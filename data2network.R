@@ -7,7 +7,7 @@ library(foreach)
 PTH = "/path/to/data/" # enter your data path
 
 # =========================================================================================================================
-# STEP1: Create gene-disease network
+# STEP1: Create gene-disease graph (using DS1)
 # =========================================================================================================================
 
 # load disease data from https://www.disgenet.org/downloads
@@ -27,7 +27,7 @@ x<-sqldf("select geneSymbol,diseaseId, count(1) as weight, min(YearInitial) from
 g_d_edges<-x[,c("geneSymbol","diseaseId","weight")]
 g_d_edges<-g_d_edges[,c("geneSymbol","diseaseId")]
 
-# keep remove diseases with less than 2 genes
+# remove diseases with fewer than 2 genes
 keep<-sqldf("select diseaseId, count(1) from g_d_edges group by diseaseId")
 keep<-keep[keep$`count(1)`>2,]
 g_d_edges<-g_d_edges[g_d_edges$diseaseId %in% keep$diseaseId,]
@@ -35,14 +35,17 @@ g_d_edges<-g_d_edges[g_d_edges$diseaseId %in% keep$diseaseId,]
 write.csv(g_d_edges,file = paste0(PTH,"g_d_edges.csv"))
 
 # =========================================================================================================================
-# STEP2: gene-tissue --> gene-gene network
+# STEP2: gene-tissue --> gene-gene graph (using DS2)
 # =========================================================================================================================
 
 # load gene-tissue data from https://www.proteinatlas.org/about/download
 
 normal_tissue_tsv <- read_delim(paste0(PTH,"normal_tissue.tsv.zip"), "\t", escape_double = FALSE, trim_ws = TRUE)
+
 tis<-normal_tissue_tsv[normal_tissue_tsv$Reliability %in% c('Approved'),]
+
 tis<-tis[tis$Level %in% c( 'High'),]
+
 g<-graph_from_data_frame(tis[,c('Gene name', 'Tissue')])
 g2M <-g
 V(g2M)$type <- bipartite_mapping(g2M)$type 
