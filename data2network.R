@@ -92,13 +92,13 @@ write.csv(gene_gene_net_edges,file=paste0(PTH,"gene_gene_net_edges_normal_tissue
 
 g_d_edges<-fread(paste0(PTH,"g_d_edges.csv"),header=TRUE)
 g_d_edges$V1<-NULL
-g_d_edges$type<-1  # 13k unique genes
+g_d_edges$type<-1
 g_d_edges<-data.frame(g_d_edges)
 
 
 gene_gene <- fread(paste0(PTH,"gene_gene_net_edges_normal_tissue.csv"),header=TRUE)
 gene_gene$V1<-NULL
-names(gene_gene)<-c("from","to","weight") # 1659 unique genes
+names(gene_gene)<-c("from","to","weight")
 g_g_t$type<-2
 
 # from g_g_t (tissue info) edges, keep only edges that their nodes (genes) are in gene-disease (g_d_edges)
@@ -110,10 +110,6 @@ names(g_d_edges)<-names(keep_gg_edges)
 g_d_t<-rbind(g_d_edges,keep_gg_edges)
 
 write.csv(g_d_t,paste0(PTH,"g_d_t.csv"))
-
-
-length(unique(g_d_t[g_d_t$type==1,]$to))
-length(union(g_d_t[g_d_t$type==2,]$to, g_d_t$from))
 
 # =========================================================================================================================
 # STEP4: Create positive (`POS`) and negative (`NEG`) examples.
