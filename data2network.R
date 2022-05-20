@@ -14,8 +14,8 @@ PTH = "/path/to/data/" # enter your data path
 
 g_d_edges<-read_delim(paste0(PTH,"all_gene_disease_associations.tsv.gz"), "\t", escape_double = FALSE, trim_ws = TRUE)
 
-g_d_edges<-g_d_edges[g_d_edges$DiseaseType == 'disease',]
-g_d_edges<-g_d_edges[g_d_edges$DiseaseSemanticType == 'Disease or Syndrome',]
+g_d_edges<-g_d_edges[g_d_edges$diseaseType == 'disease',]
+g_d_edges<-g_d_edges[g_d_edges$diseaseSemanticType == 'Disease or Syndrome',]
 
 # update missing year values
 g_d_edges[is.na(g_d_edges$YearInitial),'YearInitial']<-0
@@ -91,29 +91,29 @@ write.csv(gene_gene_net_edges,file=paste0(PTH,"gene_gene_net_edges_normal_tissue
 # =========================================================================================================================
 
 g_d_edges<-fread(paste0(PTH,"g_d_edges.csv"),header=TRUE)
-
 g_d_edges$V1<-NULL
-g_d_edges$type<-1
+g_d_edges$type<-1  # 13k unique genes
+g_d_edges<-data.frame(g_d_edges)
+
 
 gene_gene <- fread(paste0(PTH,"gene_gene_net_edges_normal_tissue.csv"),header=TRUE)
 gene_gene$V1<-NULL
-names(gene_gene)<-c("from","to","weight")
-
-# keep only gene-gene tissue edges with weight above 100
-g_g_t<-gene_gene[gene_gene$weight>100,]
+names(gene_gene)<-c("from","to","weight") # 1659 unique genes
 g_g_t$type<-2
-g_g_t$weight<-NULL
 
 # from g_g_t (tissue info) edges, keep only edges that their nodes (genes) are in gene-disease (g_d_edges)
 genes<-unique(g_d_edges$geneSymbol)
 keep_gg_edges<-g_g_t[g_g_t$from %in% genes | g_g_t$to %in% genes,]
 
-# add edges to creare gene-disease network with gene-gene edges from gene-tissue network
-g_d_edges<-data.table(g_d_edges)
+# add edges to create gene-disease network with gene-gene edges from gene-tissue network
 names(g_d_edges)<-names(keep_gg_edges)
 g_d_t<-rbind(g_d_edges,keep_gg_edges)
 
 write.csv(g_d_t,paste0(PTH,"g_d_t.csv"))
+
+
+length(unique(g_d_t[g_d_t$type==1,]$to))
+length(union(g_d_t[g_d_t$type==2,]$to, g_d_t$from))
 
 # =========================================================================================================================
 # STEP4: Create positive (`POS`) and negative (`NEG`) examples.
@@ -133,24 +133,24 @@ clu <- components(g)
 
 # sample positive edges
 for(disease in diseases){
-   print(disease)
-   df<-gene_disease[gene_disease$disease==disease,]
-   N = round(0.2*nrow(df))
-   smpedges<-data.frame()
-   # sample gene-edges
-   i=1
-   while(nrow(smpedges)<N){
-     print(i)
-     edge<-df[sample(1:nrow(df),1),] # sample 1 edge
-     new_edges <- gene_disease[gene_disease$gene!=edge$gene & gene_disease$disease!=edge$disease,] # all edges without the sampled edge
-     g_tmp<-graph_from_data_frame(new_edges)
-     if(components(g)$no <= clu$no){
-       smpedges <- rbind(smpedges,edge)
-       gene_disease <- new_edges
-       i=i+1
-     }
-   }
- }
+  print(disease)
+  df<-gene_disease[gene_disease$disease==disease,]
+  N = round(0.2*nrow(df))
+  smpedges<-data.frame()
+  # sample gene-edges
+  i=1
+  while(nrow(smpedges)<N){
+    print(i)
+    edge<-df[sample(1:nrow(df),1),] # sample 1 edge
+    new_edges <- gene_disease[gene_disease$gene!=edge$gene & gene_disease$disease!=edge$disease,] # all edges without the sampled edge
+    g_tmp<-graph_from_data_frame(new_edges)
+    if(components(g)$no <= clu$no){
+      smpedges <- rbind(smpedges,edge)
+      gene_disease <- new_edges
+      i=i+1
+    }
+  }
+}
 
 
 # delete pos edges from the graph to create train edges for the N2V embeddings
