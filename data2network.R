@@ -39,26 +39,48 @@ write.csv(g_d_edges,file = paste0(PTH,"g_d_edges.csv"))
 # =========================================================================================================================
 
 # load gene-tissue data from https://www.proteinatlas.org/about/download
+# load gene-tissue data from https://www.proteinatlas.org/about/download
+
+library(readr)
+library(sqldf)
+library(igraph)
+library(data.table)
+library(foreach)
+
+PTH = '/home/bartalab/Desktop/'
 
 normal_tissue_tsv <- read_delim(paste0(PTH,"normal_tissue.tsv.zip"), "\t", escape_double = FALSE, trim_ws = TRUE)
 
 tis<-normal_tissue_tsv[normal_tissue_tsv$Reliability %in% c('Approved'),]
 
 tis<-tis[tis$Level %in% c( 'High'),]
+tis<-data.frame(tis)
 
-g<-graph_from_data_frame(tis[,c('Gene name', 'Tissue')])
-g2M <-g
+# gene-disease associations with more than a single cell type
+tis <- sqldf("select *, count(1) as weight from tis group by `Gene.name`, Tissue having weight > 1")
+
+length(unique(tis$Gene.name))
+length(unique(tis$Tissue))
+
+g<-graph_from_data_frame(tis[,c('Gene.name', 'Tissue')])
+g2M<-g
 V(g2M)$type <- bipartite_mapping(g2M)$type 
+
 g_el <- as_edgelist(g)
+
 colnames(g_el) <- c("gene", "tissue")
+
 V(g)$type <- ifelse(V(g)$name %in% g_el[,"gene"], TRUE, FALSE)
+
 projected_g <- bipartite_projection(g, multiplicity = TRUE)
+
 gene_gene_net <- projected_g$proj2
+
 gene_gene_net_edges <- cbind( get.edgelist(gene_gene_net) , E(gene_gene_net)$weight )
+
 gene_gene_net_edges<-data.table(gene_gene_net_edges)
 
-# Keep gene-gene interactions (edges) with a frequency of at least 100
-gene_gene_net_edges <- gene_gene_net_edges[gene_gene_net_edges$weight > 100,]
+gene_gene_net_edges$V3 <- as.numeric(gene_gene_net_edges$V3)
 
 write.csv(gene_gene_net_edges,file=paste0(PTH,"gene_gene_net_edges_normal_tissue.csv"))
 
