@@ -4,7 +4,8 @@ library(igraph)
 library(data.table)
 library(foreach)
 
-PTH = "/path/to/data/" # enter your data path
+PTH = "/users/alon/Desktop/" # enter your data path
+
 
 # =========================================================================================================================
 # STEP1: Create gene-disease graph (using DS1)
@@ -92,13 +93,13 @@ write.csv(gene_gene_net_edges,file=paste0(PTH,"gene_gene_net_edges_normal_tissue
 
 g_d_edges<-fread(paste0(PTH,"g_d_edges.csv"),header=TRUE)
 g_d_edges$V1<-NULL
-g_d_edges$type<-1
+g_d_edges$type<-1  # 13k unique genes
 g_d_edges<-data.frame(g_d_edges)
 
 
 gene_gene <- fread(paste0(PTH,"gene_gene_net_edges_normal_tissue.csv"),header=TRUE)
 gene_gene$V1<-NULL
-names(gene_gene)<-c("from","to","weight")
+names(gene_gene)<-c("from","to","weight") # 1659 unique genes
 g_g_t$type<-2
 
 # from g_g_t (tissue info) edges, keep only edges that their nodes (genes) are in gene-disease (g_d_edges)
@@ -117,48 +118,42 @@ write.csv(g_d_t,paste0(PTH,"g_d_t.csv"))
 
 # 4.1 `POS` Examples: sample 20% of *gene-disease* edges (type 1) and delete them from the original network (g_d_t.csv) 
 # while ensuring that the original network obtained after edge removals is connected
+
 g_d_t <- fread(paste0(PTH,'g_d_t.csv'))
 g_d_t$V1<-NULL
 
 gene_disease <- g_d_t[g_d_t$type==1,c(1,2)]
 gene_disease<-data.frame(gene_disease)
 names(gene_disease)<-c("gene","disease")
+
 g<-graph_from_data_frame(gene_disease,directed = FALSE)
 diseases<-unique(gene_disease$disease)
 clu <- components(g)
 
-# sample positive edges
+# sample 20% positive edges
+smpedges<-data.frame()
+
 for(disease in diseases){
   print(disease)
   df<-gene_disease[gene_disease$disease==disease,]
   N = round(0.2*nrow(df))
-  smpedges<-data.frame()
   # sample gene-edges
-  i=1
-  while(nrow(smpedges)<N){
-    print(i)
-    edge<-df[sample(1:nrow(df),1),] # sample 1 edge
-    new_edges <- gene_disease[gene_disease$gene!=edge$gene & gene_disease$disease!=edge$disease,] # all edges without the sampled edge
-    g_tmp<-graph_from_data_frame(new_edges)
-    if(components(g)$no <= clu$no){
-      smpedges <- rbind(smpedges,edge)
-      gene_disease <- new_edges
-      i=i+1
-    }
-  }
+  edges<-df[sample(1:nrow(df),N),] # sample 20% edge
+  smpedges <- rbind(smpedges,edges)
 }
 
+length(unique(smpedges$disease))
 
 # delete pos edges from the graph to create train edges for the N2V embeddings
 library(dplyr)
+new_edges <- anti_join(gene_disease, smpedges,by=c("gene","disease"))
+
+pos_edges <- smpedges
 names(pos_edges)<-c("from","to")
 dis<-anti_join(g_d_t, pos_edges, by=c("from","to"))
+
 write.csv(dis,file=paste0(PTH,"/new_network.csv"))
 
-
-pos_edges<-pos_edges[union(pos_edges$from,pos_edges$to) %in% union(dis$from,dis$to),]
-
-# round(0.2*N=2) or round(0.2*N=1) is 0! so only diseases with more than 2 genes are sampled for pos examples
 write.csv(pos_edges,file=paste0(PTH,"pos_edges.csv"))
 
 
