@@ -4,7 +4,7 @@ library(igraph)
 library(data.table)
 library(foreach)
 
-PTH = "/users/alon/Desktop/" # enter your data path
+PTH = "/patg/to/data/" # enter your data path
 
 
 # =========================================================================================================================
