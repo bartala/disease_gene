@@ -41,25 +41,3 @@ for(disease in diseaeses){
 }
 
 write.csv(GDPS_matrix, file = paste0(PTH,"gene_disease_GDPS_matrix"))
-
-
-
-
-# ------------------------  Step 2 -------------------------------------------------------------
-# for each gene in gene_disease get the most similar genes from Archs4
-new_edges <- data.frame()
-genes_unique<- unique(gene_disease$gene)
-archs4_genes<-unique(rownames(cc))
-for(gene in genes_unique ) {
-  print(gene)
-  if(gene %in% archs4_genes){
-    x = cc[gene,]
-    x = x[(x>0.5 | x< -0.5)& x<1]
-    if(length(x)!=0){
-      similar_genes <- names(x)
-      new_edges <- rbind(data.frame(from=names(x), to = gene ), new_edges)
-    }
-  }
-}
-
-
