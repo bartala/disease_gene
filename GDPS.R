@@ -1,11 +1,5 @@
-# # work plan
-# [R]
 # 1. Load the gene-disease network and Archs4 gene-gene similarity network
 # 2. For each gene in Step 1 get genes with at least 0.5 similarity
-# 3. Original network - create a network (edgelist) with two types of edges:
-#   * gene-disease
-# * gene-gene similarity
-
 
 library(readr)
 library(igraph)
@@ -16,11 +10,14 @@ PTH = "/path/to/data"
 
 # ------------------------  Step 1 -------------------------------------------------------------
 
-gene_disease <- read_csv(paste0(PTH,"edgelist_OMIM_Expanded.csv.gz"), col_types = cols(X1 = col_skip()))
+# Load G_tag
+gene_disease <- read_csv(paste0(PTH,"G_tag.csv"))
+gene_disease<-gene_disease[gene_disease$type == 1,]
+names(gene_disease) = c("gene","disease")
 
 # load human gene-gene correlation matrix from Archs4
 load(paste0(PTH,"human_correlation.rda"))
-genes <- row.names(cc) # 26,415 genes
+genes <- row.names(cc)
 
 # ------------------------  Step 2 -------------------------------------------------------------
 # for each gene in gene_disease get the most similar genes from Archs4
@@ -39,11 +36,4 @@ for(gene in genes_unique ) {
   }
 }
 
-# ------------------------  Step 3 -------------------------------------------------------------
-# create edgelist
-new_edges$type = '2' # meaning gene-gene similarity score
-names(gene_disease)<-c("from","to")
-gene_disease$type = '1' # meaning disease
 
-edges <- rbind(gene_disease,new_edges)
-write.csv(edges,file="~/zalon/gene_disease/data/combined_edges.csv")
