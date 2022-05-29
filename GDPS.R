@@ -1,7 +1,4 @@
 library(readr)
-library(igraph)
-library(sqldf)
-library(dplyr)
 
 PTH = "/path/to/data"
 
