@@ -43,4 +43,4 @@ for(disease in diseaeses){
 GDPS_matrix <- data.frame(GDPS_matrix)
 row.names(GDPS_matrix)<-genes_archs4
 
-write.csv(GDPS_matrix, file = paste0(PTH,"gene_disease_GDPS_matrix"))
+write.csv(GDPS_matrix, file = paste0(PTH,"gene_disease_GDPS_matrix.csv"))
