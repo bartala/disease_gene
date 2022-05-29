@@ -2,10 +2,7 @@ library(readr)
 
 PTH = "/path/to/data"
 
-
-# ------------------------ load data -------------------------------------------------------------
-
-# Load G_tag
+# Load G
 G <- read_csv(paste0(PTH,"g_d_t.csv"))[,-1]
 G <- G[G$type == 1,]
 names(G) = c("gene","disease","label")
@@ -15,7 +12,6 @@ names(G) = c("gene","disease","label")
 load(paste0(PTH,"human_correlation.rda"))
 genes_archs4 <- names(dataset)
 
-# ------------------------  GDPS -------------------------------------------------------------
 
 GDPS <- function(disease){    
                     genes <- unique(G[G$disease == disease,]$gene)
