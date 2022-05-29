@@ -24,6 +24,7 @@ GDPS <- function(disease){
                     genes <- unique(G[G$disease == disease,]$gene)
                     genes <- genes[genes %in% genes_archs4]
                     z_tag <-  dataset[ ,genes] # select gene columns of the gene-gene matrix
+                    z_tag <- data.frame(z_tag)
                     GDPS_vec <- rowMeans(z_tag)
                     return(GDPS_vec)
                   }
@@ -42,7 +43,7 @@ for(disease in diseaeses){
   
 }
 
-mydf <- data.frame(GDPS_matrix)
-row.names(mydf)<-genes_archs4
+GDPS_matrix <- data.frame(GDPS_matrix)
+row.names(GDPS_matrix)<-genes_archs4
 
 write.csv(GDPS_matrix, file = paste0(PTH,"gene_disease_GDPS_matrix"))
