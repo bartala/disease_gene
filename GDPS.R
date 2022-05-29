@@ -8,7 +8,7 @@ G <- G[G$type == 1,]
 names(G) = c("gene","disease","label")
 
 
-# load human gene-gene correlation matrix from Archs4
+# Load human gene-gene correlation matrix from Archs4
 load(paste0(PTH,"human_correlation.rda"))
 genes_archs4 <- names(dataset)
 
