@@ -37,6 +37,7 @@ for(disease in diseaeses){
 }
 
 GDPS_matrix <- data.frame(GDPS_matrix)
-row.names(GDPS_matrix)<-genes_archs4
+row.names(GDPS_matrix) <- genes_archs4
+names(GDPS_matrix) <- diseaeses
 
-write.csv(GDPS_matrix, file = paste0(PTH,"gene_disease_GDPS_matrix.csv"), row.names = FALSE)
+write_tsv(GDPS_matrix, file = paste0(PTH,"disease_prediction.tsv.gz"))
