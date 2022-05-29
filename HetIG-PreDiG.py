@@ -13,7 +13,7 @@ from sklearn.metrics import classification_report
 import pickle
 from node2vec import Node2Vec
 
-PTH = '/home/bartalab/Desktop/gene_disease'
+PTH = '/path/to/data/'
 
 
 # load data of the original network after edge removeal
