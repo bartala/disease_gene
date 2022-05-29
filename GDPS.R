@@ -8,16 +8,42 @@ library(dplyr)
 
 PTH = "/path/to/data"
 
-# ------------------------  Step 1 -------------------------------------------------------------
+# ------------------------ load data -------------------------------------------------------------
 
 # Load G_tag
-gene_disease <- read_csv(paste0(PTH,"G_tag.csv"))
-gene_disease<-gene_disease[gene_disease$type == 1,]
-names(gene_disease) = c("gene","disease")
+G <- read_csv(paste0(PTH,"g_d_t.csv"))
+G <- G[G$type == 1,]
+names(G) = c("gene","disease")
+
 
 # load human gene-gene correlation matrix from Archs4
 load(paste0(PTH,"human_correlation.rda"))
 genes <- row.names(cc)
+
+# ------------------------  GDPS -------------------------------------------------------------
+
+GDPS <- function(disease){         
+          z_tag <-  G_tag[ , G_tag$disease == disease,]$genes ] # select gene columns in cc
+          GDPS_vec <- rowMeans(z_tag)
+          return(GDPS_vec)
+}
+
+
+
+diseaeses <- unique(G$disease)
+
+GDPS_matrix = data.frame()
+
+for(disease in diseaeses){
+  
+        GDPS_vec <- GDPS(disease)
+        GDPS_matrix <- cbind(GDPS_matrix,GDPS)
+}
+
+write.csv(GDPS_matrix, file = paste0(PTH,"gene_disease_GDPS_matrix"))
+
+
+
 
 # ------------------------  Step 2 -------------------------------------------------------------
 # for each gene in gene_disease get the most similar genes from Archs4
