@@ -18,8 +18,8 @@ PTH = "/path/to/data"
 
 gene_disease <- read_csv(paste0(PTH,"edgelist_OMIM_Expanded.csv.gz"), col_types = cols(X1 = col_skip()))
 
-# load the human gene-gene correlation matrix from Archs4
-load("~/zalon/gene_disease/data/human_correlation.rda")
+# load human gene-gene correlation matrix from Archs4
+load(paste0(PTH,"human_correlation.rda"))
 genes <- row.names(cc) # 26,415 genes
 
 # ------------------------  Step 2 -------------------------------------------------------------
