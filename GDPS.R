@@ -1,6 +1,3 @@
-# 1. Load the gene-disease network and Archs4 gene-gene similarity network
-# 2. For each gene in Step 1 get genes with at least 0.5 similarity
-
 library(readr)
 library(igraph)
 library(sqldf)
