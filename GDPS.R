@@ -12,9 +12,11 @@ library(igraph)
 library(sqldf)
 library(dplyr)
 
+PTH = "/path/to/data"
+
 # ------------------------  Step 1 -------------------------------------------------------------
 
-gene_disease <- read_csv("zalon/gene_disease/data/edgelist_OMIM_Expanded.csv.gz", col_types = cols(X1 = col_skip()))
+gene_disease <- read_csv(paste0(PTH,"edgelist_OMIM_Expanded.csv.gz"), col_types = cols(X1 = col_skip()))
 
 # load the human gene-gene correlation matrix from Archs4
 load("~/zalon/gene_disease/data/human_correlation.rda")
