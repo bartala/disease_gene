@@ -12,8 +12,12 @@ Graph analytical approaches permit identifying novel genes involved in complex d
   * Create positive and negative training examples: `pos_neg_edges.csv`.
 
 
-`GDPS.R` calculates the Gene-Disease prioritization score (GDPS) using the gene-gene correlation matrix from [Dataset 3 (DS3)](https://maayanlab.cloud/archs4/download.html)
+`GDPS.R` 
+* Calculates the Gene-Disease prioritization score (GDPS) using the gene-gene correlation matrix from [Dataset 3 (DS3)](https://maayanlab.cloud/archs4/download.html)
 
+`HetIG-PreDiG.py` 
+* Learns node embeddings using node2vec.
+* Train a logistic regression model to classify pairs of nodes into a link will/not form group. 
 
 
 
