@@ -81,7 +81,7 @@ def get_embeddings(nodes):
 nodes_v = get_embeddings(nodes)
 
 """
-For each row in `training_testing_edges` (pair of nodes --> i.e. edges) sum teir embeddings into a single vector `x`
+For each row in `training_testing_edges` (pair of nodes --> i.e. edges) sum their embeddings into a single vector `x`
 * Recall in `training_testing_edges` each 'from' node is a gene and 'to' node is a disease 
 """
 
