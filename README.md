@@ -6,13 +6,13 @@ Graph analytical approaches permit identifying novel genes involved in complex d
 ## Running the code
 
 `data2network.R`
-  * Create gene-disease graph using [DS1](https://www.disgenet.org/downloads)
-  * Create gene-tissue graph and convert it into a gene-gene graph using [DS2](https://www.proteinatlas.org/about/download)
+  * Create gene-disease graph using [Dataset 1 (DS1)](https://www.disgenet.org/downloads)
+  * Create gene-tissue graph and convert it into a gene-gene graph using [Dataset 2 (DS2)](https://www.proteinatlas.org/about/download)
   * Combine the gene-disease graph with gene-gene graph. The combined graph's edges are saved into `g_d_t.csv`.
   * Create positive and negative training examples: `pos_neg_edges.csv`.
 
 
-`GDPS.R` calculates the Gene-Disease prioritization score (GDPS).
+`GDPS.R` calculates the Gene-Disease prioritization score (GDPS) using the gene-gene correlation matrix from [Dataset 3 (DS3)](https://maayanlab.cloud/archs4/download.html)
 
 
 
