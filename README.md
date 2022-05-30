@@ -4,7 +4,7 @@
 This repository contains code and links to the datasets necessary to run the HetIG-PreDiG model. 
 HetIG-PreDiG is a method for predicting novel disease genes using node embeddings in heterogeneous graphs.
 
-### Motivatoin
+### Motivation
 Graph analytical approaches permit identifying novel genes involved in complex diseases, but are limited by (i) inferring structural network similarity of connected genes, ignoring potentially relevant unconnected nodes; (ii) using homogeneous graphs, missing gene-disease associations’ complexity; (iii) relying on disease/gene-phenotype associations’ similarities, involving highly incomplete data; (iv) using binary classification, with gene-disease edges as positive training samples, and non-associated gene and disease nodes as negative samples that may include currently unknown disease genes; or (v) reporting predicted novel associations without systematically evaluating their accuracy. 
 
 ### Results
