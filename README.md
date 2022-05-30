@@ -15,8 +15,8 @@ HetIG-PreDiG analyzes a graph with gene-gene, gene-disease, and gene-tissue asso
 `data2network.R`
   * Create gene-disease graph using [Dataset 1 (DS1)](https://www.disgenet.org/downloads)
   * Create gene-tissue graph and convert it into a gene-gene graph using [Dataset 2 (DS2)](https://www.proteinatlas.org/about/download)
-  * Combine the gene-disease graph with gene-gene graph. The combined graph's edges are saved into `g_d_t.csv`.
-  * Create positive and negative training examples: `pos_neg_edges.csv`.
+  * Combine the gene-disease graph with gene-gene graph.
+  * Create positive and negative training examples.
 
 
 `GDPS.R` 
