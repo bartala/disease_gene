@@ -1,7 +1,13 @@
 # HetIG-PreDiG: A Heterogeneous Integrated Graph Model for Predicting Human Disease Genes Based on Gene Expression
 
-## Abstract
-Graph analytical approaches permit identifying novel genes involved in complex diseases, but are limited by (i) inferring structural network similarity of connected genes, ignoring potentially relevant unconnected nodes; (ii) using homogeneous graphs, missing gene-disease associations’ complexity; (iii) relying on disease/gene-phenotype associations’ similarities, involving highly incomplete data; (iv) using binary classification, with gene-disease edges as positive training samples, and non-associated gene and disease nodes as negative samples that may include currently unknown disease genes; or (v) reporting predicted novel associations without systematically evaluating their accuracy. Addressing these limitations, we develop the Heterogeneous Integrated Graph for Disease Genes Prediction model (HIGDGP) that includes gene-gene, gene-disease, and gene-tissue associations. We predict novel disease genes using low-dimensional representation of nodes accounting for network structure, and extending beyond network structure using the developed Gene-Disease Prioritization Score (GDPS) reflecting the degree of gene-disease association via gene co-expression data. For negative training samples, we select non-associated gene and disease nodes with lower GDPS. Lastly, we evaluate the developed model’s success in predicting novel disease genes by analyzing the prediction probabilities of gene-disease associations. HIGDGP successfully predicts (Micro-F1 = 0.91) gene-disease associations, outperforming baseline models, and is validated using published literature, thus advancing our understanding of genetic diseases.
+## Overview
+This repository contains code and links to the datasets necessary to run the HetIG-PreDiG model. 
+HetIG-PreDiG is a method for predicting novel disease genes using node embeddings in heterogeneous graphs.
+
+### Motivatoin
+Graph analytical approaches permit identifying novel genes involved in complex diseases, but are limited by (i) inferring structural network similarity of connected genes, ignoring potentially relevant unconnected nodes; (ii) using homogeneous graphs, missing gene-disease associations’ complexity; (iii) relying on disease/gene-phenotype associations’ similarities, involving highly incomplete data; (iv) using binary classification, with gene-disease edges as positive training samples, and non-associated gene and disease nodes as negative samples that may include currently unknown disease genes; or (v) reporting predicted novel associations without systematically evaluating their accuracy. 
+
+HetIG-PreDiG includes gene-gene, gene-disease, and gene-tissue associations. It allows predicting novel disease genes using low-dimensional representation of nodes accounting for network structure, and extending beyond network structure using the developed Gene-Disease Prioritization Score (GDPS) reflecting the degree of gene-disease association via gene co-expression data.
 
 ## Running the code
 
