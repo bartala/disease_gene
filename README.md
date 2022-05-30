@@ -18,11 +18,11 @@ If you find HetIG-PreDiG useful for your research, please consider citing us:
 @article{Jagodnik2022,
   title     = {HetIG-PreDiG: A Heterogeneous Integrated Graph Model for Predicting Human Disease Genes Based on Gene Expression.},
   author    = {Jagodnik, Kathleen M. and Shvili, Yael and Bartal, Alon},
-  journal   = {Bioinformatics},
-  volume    = {34},
-  number    = {13},
-  pages     = {457–466},
-  year      = {2018}
+  journal   = {},
+  volume    = {},
+  number    = {},
+  pages     = {from page– to page},
+  year      = {2022}
 }
 ```
 
