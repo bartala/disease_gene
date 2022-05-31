@@ -166,13 +166,19 @@ X_train, X_test, y_train, y_test = train_test_split(x.iloc[:,1:], y, test_size=0
 print(X_train.shape, y_train.shape)
 print(X_test.shape, y_test.shape)
 
+
+# CV for a model with GDPS
+evaluate(X_train, y_train, LogisticRegression(), 10)
+
+# CV for a model without GDPS
+evaluate(X_train.iloc[:,0:-1], y_train, LogisticRegression(), 10)
+
+
 # Train a logistic regression model No GDPS
 logreg_nogdps = LogisticRegression(max_iter=300).fit(X_train.iloc[:,0:-1], y_train)
 y_pred = logreg_nogdps.predict(X_test.iloc[:,0:-1])
 report(y_pred, y_test)
 
-# cross validation
-#evaluate(X_train,y_train,logreg_nogdps,10)
 
 # Train a logistic regression model
 logreg = LogisticRegression(max_iter=300).fit(X_train, y_train)
