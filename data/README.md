@@ -1,4 +1,4 @@
-# Linked to datasets
+# Linkes to datasets
 
 ## Dataset 1 (DS1)
 DisGeNET [https://www.disgenet.org/downloads]
