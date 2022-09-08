@@ -22,19 +22,19 @@ PTH = '/path/to/data/'
 df = pd.read_csv(os.path.join(PTH,'G_tag.csv'))
 
 # create an undirected networkx graph
-G_karate = nx.from_pandas_edgelist(df, 'from', 'to')
-G_karate = nx.to_undirected(G_karate)
+G_k = nx.from_pandas_edgelist(df, 'from', 'to')
+G_k = nx.to_undirected(G_k)
 
-n = G_karate.number_of_nodes()
-m = G_karate.number_of_edges()
+n = G_k.number_of_nodes()
+m = G_k.number_of_edges()
 print("Number of nodes :", str(n))
 print("Number of edges :", str(m))
-print("Number of connected components :", str(nx.number_connected_components(G_karate)))
+print("Number of connected components :", str(nx.number_connected_components(G_k)))
 
 """## Learn node embeddings"""
 
 # compute transition probabilities and generate walks
-node2vec = Node2Vec(G_karate, dimensions=64, walk_length=5, num_walks=10, p=1, q=1, workers=4)
+node2vec = Node2Vec(G_k, dimensions=64, walk_length=5, num_walks=10, p=1, q=1, workers=4)
 
 # Learn nodes embeddings
 model = node2vec.fit(window=10, min_count=1, batch_words=4)
