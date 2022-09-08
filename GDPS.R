@@ -3,24 +3,24 @@ library(readr)
 PTH = "/path/to/data"
 
 # Load G
-G <- read_csv(paste0(PTH,"g_d_t.csv"))[,-1]
-G <- G[G$type == 1,]
+G <- read_csv(paste0(PTH,"G_tag.csv")) # or load d_g_t.csv
+G <- G[G$type == 1,] # gene-disease edges
 names(G) = c("gene","disease","label")
 
 
 # Load human gene-gene correlation matrix from Archs4
-load(paste0(PTH,"human_correlation.rda"))
+load(paste0(PTH,"human_correlation.rda")) # this loades a `dataset` object
 genes_archs4 <- names(dataset)
 
 
 GDPS <- function(disease){    
-                    genes <- unique(G[G$disease == disease,]$gene)
-                    genes <- genes[genes %in% genes_archs4]
-                    z_tag <-  dataset[ ,genes] # select gene columns of the gene-gene matrix
-                    z_tag <- data.frame(z_tag)
-                    GDPS_vec <- rowMeans(z_tag)
-                    return(GDPS_vec)
-                  }
+  genes <- unique(G[G$disease == disease,]$gene)
+  genes <- genes[genes %in% genes_archs4]
+  z_tag <- dataset[ ,genes] # select gene columns of the gene-gene matrix
+  z_tag <- data.frame(z_tag)
+  GDPS_vec <- rowMeans(z_tag)
+  return(GDPS_vec)
+}
 
 
 
