@@ -37,14 +37,15 @@ HetIG-PreDiG is tested to work under Python 3 and R 4.1.2 with RStudio 2021.09.2
 ## Citing
 If you find HetIG-PreDiG useful for your research, please consider citing us:
 ```
-@article{Jagodnik2022,
-  title     = {HetIG-PreDiG: A Heterogeneous Integrated Graph Model for Predicting Human Disease Genes Based on Gene Expression.},
-  author    = {Jagodnik, Kathleen M. and Shvili, Yael and Bartal, Alon},
-  journal   = {PLOS ONE},
-  volume    = {},
-  number    = {},
-  pages     = {from page– to page},
-  year      = {2023}
+@article{jagodnik2023hetig,
+  title={HetIG-PreDiG: A heterogeneous integrated graph model for predicting human disease genes based on gene expression},
+  author={Jagodnik, Kathleen M and Shvili, Yael and Bartal, Alon},
+  journal={Plos one},
+  volume={18},
+  number={2},
+  pages={e0280839},
+  year={2023},
+  publisher={Public Library of Science San Francisco, CA USA}
 }
 ```
 
